@@ -15,7 +15,10 @@ import org.github.rsyncbackup.impl.BackupConf;
 import org.github.rsyncbackup.impl.BackupConf.ConfHost;
 import org.github.rsyncbackup.impl.BackupConf.ConfVolume;
 import org.github.rsyncbackup.impl.HostDir;
+import org.joda.time.Duration;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +127,6 @@ public class RSyncBackup
         int exitCode=executeCommand("SSH-TEST", createCmdSsh(host, "NOOP"), env, null);
         if (exitCode!=0)
         {
-            statistics.backupOk=false;
             statistics.backupErrors.add("Error when running remote NOOP command. Exit code "+exitCode);
             LOG.warn("Error when running remote NOOP command. Exit code "+exitCode);
         }
@@ -225,7 +227,16 @@ public class RSyncBackup
             
             String sizeStr=size+" "+units[unit];
             
-            LOG.info("Statistics: {} files changed, using {} of disk space.",statistics.changedFileCount,sizeStr);
+            Duration duration=new Duration(statistics.startTime.toDateTime(),statistics.endTime.toDateTime());
+            
+            PeriodFormatter periodFormatter=new PeriodFormatterBuilder()
+                .appendDays().appendSuffix("d").appendSeparator(" ")
+                .appendHours().appendSuffix("h").appendSeparator(" ")
+                .appendMinutes().appendSuffix("m").appendSeparator(" ")
+                .appendSeconds().appendSuffix("s")
+                .toFormatter();
+            
+            LOG.info("Statistics: {} files changed, using {} of disk space. Duration: {}",statistics.changedFileCount,sizeStr,periodFormatter.print(duration.toPeriod()));
         }
         
         LOG.info("Backup finished.");
