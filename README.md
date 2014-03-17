@@ -44,8 +44,8 @@ Features (in progress)
 * easy restore of single files, using "cp"
 * easy bare-metal-restore of complete systems, using "rsync"
 * statistics & diagnostics
-** by default monitors count and size of changed files. Warns about big files that are changed from backup to backup
-** analyze which files/directories makes a backups large (where space cannot be saved using hard links because of changed files)  
+ * by default monitors count and size of changed files. Warns about big files that are changed from backup to backup
+ * analyze which files/directories makes a backups large (where space cannot be saved using hard links because of changed files)  
 * monitoring (e.g. to zabbix or via email)
 * scheduling: run N backups in parallel. Avoid to run many backups in parallel that share the same physical host,
   the same internet connection or other resources.
@@ -71,11 +71,11 @@ Progress
 * configuration: done
 * client scripts: done
 * backup: done
-** save space using hard links: done
-** automatic resume: done
+ * save space using hard links: done
+ * automatic resume: done
 * restore: documented, tested
 * delete old backups: done
-** strategy "interval", ported from storebackup: http://www.nongnu.org/storebackup/en/node48.html
+ * strategy "interval", ported from storebackup: http://www.nongnu.org/storebackup/en/node48.html
 * statistics & disgnostics: in progress
 * scheduling: open (simply run RSyncBackup for each client via cron)
 * monitoring: open
