@@ -1,0 +1,10 @@
+# example client backup.conf
+
+DRY_RUN=0
+MYSQL_DIR=/var/dbbackup
+MYSQL_ARGS="-uroot"
+
+# Allow a ssh-proxied connection to a different host begind this host
+#PROXY_name_HOST=192.168.1.2
+#PROXY_name_PORT=22
+

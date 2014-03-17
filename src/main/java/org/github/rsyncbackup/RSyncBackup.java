@@ -32,9 +32,6 @@ public class RSyncBackup
         try
         {
             RSyncBackup backup=new RSyncBackup(args);
-    
-            args = new String[]
-                    { "gatekeeper.lan.evermind.de" };
             
             if (args.length == 0)
             {
@@ -122,11 +119,24 @@ public class RSyncBackup
         Map<String, String> env = new HashMap<>();
         env.put("SSH_AUTH_SOCK", "");
 
-        boolean allOk=true;
-
-        executeCommand("SSH-TEST", createCmdSsh(host, "NOOP"), env, null);
+        statistics.backupOk=true;
         
-        executeCommand("PRE_BACKUP", createCmdSsh(host, "PRE_BACKUP"), env, null);
+        int exitCode=executeCommand("SSH-TEST", createCmdSsh(host, "NOOP"), env, null);
+        if (exitCode!=0)
+        {
+            statistics.backupOk=false;
+            statistics.backupErrors.add("Error when running remote NOOP command. Exit code "+exitCode);
+            LOG.warn("Error when running remote NOOP command. Exit code "+exitCode);
+        }
+        
+        exitCode=executeCommand("PRE_BACKUP", createCmdSsh(host, "PRE_BACKUP"), env, null);
+        if (exitCode!=0)
+        {
+            statistics.backupOk=false;
+            statistics.backupErrors.add("Error when running remote PRE_BACKUP command. Exit code "+exitCode);
+            LOG.warn("Error when running remote PRE_BACKUP command. Exit code "+exitCode);
+        }
+        
         
         List<String> cmdRsyncPreBackup = new ArrayList<>();
         appendCommand(cmdRsyncPreBackup, host.cmdRsync);
@@ -166,11 +176,9 @@ public class RSyncBackup
 
             cmdRsync.add(syncDir.getAbsolutePath() + "/"+ volume.volume + "/");
 
-            LOG.info("Executing rsync: {}",dumpCommand(cmdRsync, env));
-
             try
             {
-                int exitCode=executeCommand("RSYNC",cmdRsync, env, null);
+                exitCode=executeCommand("RSYNC",cmdRsync, env, null);
                 
                 if (exitCode==0)
                 {
@@ -182,25 +190,23 @@ public class RSyncBackup
                 }
                 else
                 {
+                    statistics.backupOk=false;
                     statistics.backupErrors.add("Errors in rsync for "+volume.volume+": exit code "+exitCode);
                     
                     LOG.warn("Rsync exited with status {} - backup failed",exitCode);
-                    allOk=false;
                 }
             }
             catch (Exception ex)
             {
+                statistics.backupOk=false;
                 statistics.backupErrors.add("Errors in rsync for "+volume.volume+": "+ex);
                 LOG.warn("Error during command execution - backup failed",ex);
-                allOk=false;
             }
         }
         
         statistics.endTime=new LocalDateTime();
         
-        statistics.backupOk=allOk;
-        
-        if (allOk)
+        if (statistics.backupOk)
         {
             LocalDateTime backup=hostDir.setBackupDone();
             
@@ -241,7 +247,7 @@ public class RSyncBackup
         cmdSsh.add("-o");
         cmdSsh.add("UserKnownHostsFile " + new File(confDir, "backup_ssh_known_hosts"));
         cmdSsh.add("-o");
-        cmdSsh.add("HashKnownHosts No");
+        cmdSsh.add("HashKnownHosts no");
         
         if ("NOOP".equals(remoteCommand)) // Fake-Command: adds the host's ssh key to the authorized keys if it is not already there
         {
@@ -336,6 +342,8 @@ public class RSyncBackup
 
     protected static int executeCommand(String logName, List<String> cmdList, Map<String, String> env, CommandOutputConsumer outputConsumer) throws Exception
     {
+        LOG.info("Executing {}: {}",logName, dumpCommand(cmdList, env));
+        
         ProcessBuilder bp = new ProcessBuilder(cmdList);
         bp.redirectErrorStream(true);
 
