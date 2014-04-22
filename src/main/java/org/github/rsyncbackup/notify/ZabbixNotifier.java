@@ -10,15 +10,19 @@ import org.github.rsyncbackup.tools.ZabbixSender;
 import org.github.rsyncbackup.tools.ZabbixSender.ZabbixSenderItem;
 import org.github.rsyncbackup.tools.ZabbixSender.ZabbixSenderResponse;
 import org.joda.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ZabbixNotifier
 {
     public static void notify(ConfHost conf, BackupStatistics statistics)
     {
+        Logger LOG=LoggerFactory.getLogger(ZabbixNotifier.class);
+        
         if (conf.notifyZabbixServer==null || conf.notifyZabbixServer.isEmpty()) return;
         if (conf.notifyZabbixHost==null || conf.notifyZabbixHost.isEmpty()) return;
         
-        RSyncBackup.LOG.debug("Sending notify via zabbix");
+        LOG.debug("Sending notify via zabbix");
         
         List<ZabbixSenderItem> items=new ArrayList<>();
         
@@ -40,11 +44,11 @@ public class ZabbixNotifier
         {
             // TODO: check zabbix response and log result
             ZabbixSenderResponse response=new ZabbixSender(conf.notifyZabbixServer).sendItems(items);
-            RSyncBackup.LOG.info("Sent notify via zabbix: "+response);
+            LOG.info("Sent notify via zabbix: "+response);
         }
         catch (Exception ex)
         {
-            RSyncBackup.LOG.warn("Failed to send notify via zabbix",ex);
+            LOG.warn("Failed to send notify via zabbix",ex);
         }
         
     }
