@@ -61,6 +61,8 @@ public class BackupConf
         conf.cmdSsh="/usr/bin/ssh";
         conf.remoteAddress="${host}";
         conf.volumes=new ConfVolume[] {new ConfVolume("ROOT","tmp")};
+        conf.notifyZabbixServer=null;
+        conf.notifyZabbixHost="${host}";
         return conf;
     }
     
@@ -150,6 +152,9 @@ public class BackupConf
         public ConfVolume[] volumes;
         public IBackupKeepStrategy backupKeepStrategy;
         
+        public String notifyZabbixServer;
+        public String notifyZabbixHost;
+        
         protected void applyDefaults(ConfHost defaults)
         {
             if (this.storageDir==null) this.storageDir=defaults.storageDir;
@@ -161,6 +166,8 @@ public class BackupConf
             if (this.remoteSshPort==null) this.remoteSshPort=defaults.remoteSshPort;
             if (this.volumes==null) this.volumes=defaults.volumes;
             if (this.keepStrategy==null) this.keepStrategy=defaults.keepStrategy;
+            if (this.notifyZabbixServer==null) this.notifyZabbixServer=defaults.notifyZabbixServer;
+            if (this.notifyZabbixHost==null) this.notifyZabbixHost=defaults.notifyZabbixHost;
         }
         
         protected void initialize()

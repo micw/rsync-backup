@@ -15,6 +15,7 @@ import org.github.rsyncbackup.impl.BackupConf;
 import org.github.rsyncbackup.impl.BackupConf.ConfHost;
 import org.github.rsyncbackup.impl.BackupConf.ConfVolume;
 import org.github.rsyncbackup.impl.HostDir;
+import org.github.rsyncbackup.notify.ZabbixNotifier;
 import org.joda.time.Duration;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.PeriodFormatter;
@@ -29,7 +30,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 
 public class RSyncBackup
 {
-    protected static Logger LOG;
+    public static Logger LOG;
     public static void main(String[] args) throws Exception
     {
         try
@@ -238,6 +239,8 @@ public class RSyncBackup
             
             LOG.info("Statistics: {} files changed, using {} of disk space. Duration: {}",statistics.changedFileCount,sizeStr,periodFormatter.print(duration.toPeriod()));
         }
+        
+        ZabbixNotifier.notify(host,statistics);
         
         LOG.info("Backup finished.");
     }
