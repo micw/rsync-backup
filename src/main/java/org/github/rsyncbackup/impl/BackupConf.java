@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.github.rsyncbackup.keep.IBackupKeepStrategy;
@@ -28,7 +30,7 @@ public class BackupConf
             BackupConfHolder holder=reader.read(BackupConfHolder.class);
             
             BackupConf conf=new BackupConf();
-            conf.hostMap=new HashMap<>();
+            conf.hostMap=new LinkedHashMap<>();
             
             ConfHost hostDefaults=holder.defaults;
             if (hostDefaults==null) hostDefaults=createDefaultHostConf();
@@ -60,6 +62,8 @@ public class BackupConf
         conf.cmdRsync="/usr/bin/rsync";
         conf.cmdSsh="/usr/bin/ssh";
         conf.remoteAddress="${host}";
+        conf.scheduleGroup="${host}";
+        conf.scheduleEnabled=Boolean.TRUE;
         conf.volumes=new ConfVolume[] {new ConfVolume("ROOT","tmp")};
         conf.notifyZabbixServer=null;
         conf.notifyZabbixHost="${host}";
@@ -67,6 +71,11 @@ public class BackupConf
     }
     
     protected Map<String,ConfHost> hostMap;
+    
+    public List<ConfHost> getAllHosts()
+    {
+        return new ArrayList<>(hostMap.values());
+    }
     
     public ConfHost getForHost(String hostname)
     {
@@ -148,6 +157,8 @@ public class BackupConf
         public String cmdRsync;
         public String cmdSsh;
         public String keepStrategy;
+        public String scheduleGroup;
+        public Boolean scheduleEnabled;
         public Integer remoteSshPort;
         public ConfVolume[] volumes;
         public IBackupKeepStrategy backupKeepStrategy;
@@ -168,6 +179,8 @@ public class BackupConf
             if (this.keepStrategy==null) this.keepStrategy=defaults.keepStrategy;
             if (this.notifyZabbixServer==null) this.notifyZabbixServer=defaults.notifyZabbixServer;
             if (this.notifyZabbixHost==null) this.notifyZabbixHost=defaults.notifyZabbixHost;
+            if (this.scheduleGroup==null) this.scheduleGroup=defaults.scheduleGroup;
+            if (this.scheduleEnabled==null) this.scheduleEnabled=defaults.scheduleEnabled;
         }
         
         protected void initialize()

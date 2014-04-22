@@ -14,7 +14,9 @@ import java.util.Map.Entry;
 import org.github.rsyncbackup.impl.BackupConf;
 import org.github.rsyncbackup.impl.BackupConf.ConfHost;
 import org.github.rsyncbackup.impl.BackupConf.ConfVolume;
+import org.github.rsyncbackup.impl.BackupScheduler;
 import org.github.rsyncbackup.impl.HostDir;
+import org.github.rsyncbackup.impl.IBackupExecutor;
 import org.github.rsyncbackup.notify.ZabbixNotifier;
 import org.joda.time.Duration;
 import org.joda.time.LocalDateTime;
@@ -28,22 +30,32 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 
-public class RSyncBackup
+public class RSyncBackup implements IBackupExecutor
 {
     public static Logger LOG;
     public static void main(String[] args) throws Exception
     {
+        // FIXME: LOCKING!
         try
         {
             RSyncBackup backup=new RSyncBackup(args);
             
             if (args.length == 0)
             {
-                System.err.println("Missing argument: hostname");
+                System.err.println("Missing argument: hostname|ALL [maxParallel]");
                 System.exit(1);
             }
-    
-            backup.runBackupForHost(args[0]);
+            if (args[0].equalsIgnoreCase("ALL"))
+            {
+                int maxParallel=(args.length==1)?1:Integer.parseInt(args[1]);
+                
+                BackupScheduler scheduler=new BackupScheduler(maxParallel, backup.conf.getAllHosts(), backup);
+                scheduler.executeBackups();
+            }
+            else
+            {
+                backup.runBackupForHost(args[0]);
+            }
         }
         catch (Exception ex)
         {
@@ -96,7 +108,7 @@ public class RSyncBackup
         conf = BackupConf.read(new File(confDir, "backup.conf"));
     }
     
-    protected void runBackupForHost(String hostname) throws Exception
+    public void runBackupForHost(String hostname) throws Exception
     {
         BackupStatistics statistics=new BackupStatistics();
         statistics.startTime=new LocalDateTime();
