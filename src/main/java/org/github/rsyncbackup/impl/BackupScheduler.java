@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.github.rsyncbackup.RSyncBackup;
 import org.github.rsyncbackup.impl.BackupConf.ConfHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,7 @@ public class BackupScheduler implements Runnable
     
     protected boolean executeNextBackup(String threadName)
     {
+        RSyncBackup.setThreadHostname(null); // for correct log target
         ConfHost hostTask=null;
         synchronized(this)
         {
@@ -101,6 +103,7 @@ public class BackupScheduler implements Runnable
                 }
                 finally
                 {
+                    RSyncBackup.setThreadHostname(null); // for correct log target
                     LOG.info("Finished {} on {}",hostTask.host,threadName);
                 }
             }

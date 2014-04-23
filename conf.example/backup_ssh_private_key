@@ -1,0 +1,3 @@
+-----BEGIN RSA PRIVATE KEY-----
+Put your private key here. Place the public key to the clients (allow access to backup_shell.sh)
+-----END RSA PRIVATE KEY-----

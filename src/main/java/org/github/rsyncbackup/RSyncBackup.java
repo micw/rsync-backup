@@ -361,7 +361,7 @@ public class RSyncBackup implements IBackupExecutor
     }
     
     
-    protected void setThreadHostname(String hostname)
+    public static void setThreadHostname(String hostname)
     {
         Thread.currentThread().setName(hostname==null?"global":hostname);
     }
