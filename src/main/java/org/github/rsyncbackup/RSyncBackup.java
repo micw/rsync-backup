@@ -2,7 +2,10 @@ package org.github.rsyncbackup;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
@@ -35,6 +38,25 @@ public class RSyncBackup implements IBackupExecutor
     public static Logger LOG;
     public static void main(String[] args) throws Exception
     {
+        FileLock lock;
+        String lockFileName="RSyncBackup.lock";
+        try
+        {
+            RandomAccessFile lockFile=new RandomAccessFile(lockFileName,"rw");
+            lock=lockFile.getChannel().tryLock(0,0,false);
+        }
+        catch (IOException ex)
+        {
+            lock=null;
+        }
+        
+        if (lock==null)
+        {
+            System.err.println("Unable to lock "+lockFileName+" - Backup already running?");
+            return;
+        }
+        
+        
         // FIXME: LOCKING!
         try
         {
@@ -61,6 +83,10 @@ public class RSyncBackup implements IBackupExecutor
         {
             LOG.error("Fatal error",ex);
             System.exit(1);
+        }
+        finally
+        {
+            lock.release();
         }
         
     }
