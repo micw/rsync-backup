@@ -65,6 +65,7 @@ public class BackupConf
         conf.scheduleGroup="${host}";
         conf.scheduleEnabled=Boolean.TRUE;
         conf.volumes=new ConfVolume[] {new ConfVolume("ROOT","tmp")};
+        conf.notifyZabbixRetryCount=3;
         conf.notifyZabbixServer=null;
         conf.notifyZabbixHost="${host}";
         return conf;
@@ -165,6 +166,7 @@ public class BackupConf
         
         public String notifyZabbixServer;
         public String notifyZabbixHost;
+        public Integer notifyZabbixRetryCount;
         
         protected void applyDefaults(ConfHost defaults)
         {
@@ -179,6 +181,7 @@ public class BackupConf
             if (this.keepStrategy==null) this.keepStrategy=defaults.keepStrategy;
             if (this.notifyZabbixServer==null) this.notifyZabbixServer=defaults.notifyZabbixServer;
             if (this.notifyZabbixHost==null) this.notifyZabbixHost=defaults.notifyZabbixHost;
+            if (this.notifyZabbixRetryCount==null) this.notifyZabbixRetryCount=defaults.notifyZabbixRetryCount;
             if (this.scheduleGroup==null) this.scheduleGroup=defaults.scheduleGroup;
             if (this.scheduleEnabled==null) this.scheduleEnabled=defaults.scheduleEnabled;
         }

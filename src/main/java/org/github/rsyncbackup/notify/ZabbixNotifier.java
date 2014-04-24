@@ -40,15 +40,37 @@ public class ZabbixNotifier
             items.add(new ZabbixSenderItem(conf.notifyZabbixHost, "backup.status", "ERR: See log for details"));
         }
         
-        try
+        int retryCount=(conf.notifyZabbixRetryCount!=null)?conf.notifyZabbixRetryCount:1;
+        if (retryCount<1) retryCount=1;
+        
+        for(int retryNum=1;retryNum<=retryCount;retryNum++)
         {
-            // TODO: check zabbix response and log result
-            ZabbixSenderResponse response=new ZabbixSender(conf.notifyZabbixServer).sendItems(items);
-            LOG.info("Sent notify via zabbix: "+response);
-        }
-        catch (Exception ex)
-        {
-            LOG.warn("Failed to send notify via zabbix",ex);
+            try
+            {
+                // TODO: check zabbix response and log result
+                ZabbixSenderResponse response=new ZabbixSender(conf.notifyZabbixServer).sendItems(items);
+                LOG.info("Sent notify via zabbix: "+response);
+                break;
+            }
+            catch (Exception ex)
+            {
+                if (retryNum<retryCount)
+                {
+                    LOG.warn("Failed to send notify via zabbix - retrying ({})",ex.toString());
+                    try
+                    {
+                        Thread.sleep(500);
+                    }
+                    catch (InterruptedException iex)
+                    {
+                        
+                    }
+                }
+                else
+                {
+                    LOG.warn("Failed to send notify via zabbix",ex);
+                }
+            }
         }
         
     }
